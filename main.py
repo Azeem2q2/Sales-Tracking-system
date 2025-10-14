@@ -2,6 +2,7 @@ from inventory_manager import InventoryManager
 from sales_manager import SalesManager
 from reports import generate_inventory_report, generate_sales_report
 from exceptions import OutOfStockError
+from reports import generate_inventory_report, generate_sales_report
 
 def main():
     inventory = InventoryManager()
