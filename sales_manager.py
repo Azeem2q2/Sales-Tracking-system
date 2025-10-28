@@ -17,10 +17,10 @@ class SalesManager:
         total_price = product.price * quantity
         sale = Sale(product_id, quantity, total_price)
         self.sales.append(sale)
-        print(f"✅ Sale recorded: {sale}")
+        print(f"Sale recorded: {sale}")
 
     def list_sales(self):
         if not self.sales:
-            print("📭 No sales recorded.")
+            print("No sales recorded.")
         for s in self.sales:
             print(s)

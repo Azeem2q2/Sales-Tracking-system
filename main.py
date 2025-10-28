@@ -9,7 +9,7 @@ def main():
     sales = SalesManager(inventory)
 
     while True:
-        print("\n📋 Menu:")
+        print("\n Menu:")
         print("1. Add Product")
         print("2. Update Product")
         print("3. Remove Product")
@@ -52,7 +52,7 @@ def main():
                 try:
                     sales.record_sale(pid, qty)
                 except OutOfStockError as e:
-                    print(f"⚠️ {e}")
+                    print(f"{e}")
 
             elif choice == "6":
                 sales.list_sales()
@@ -62,14 +62,14 @@ def main():
                 generate_sales_report(sales)
 
             elif choice == "0":
-                print("👋 Exiting...")
+                print("Exiting...")
                 break
 
             else:
-                print("❌ Invalid choice.")
+                print("Invalid choice.")
 
         except Exception as e:
-            print(f"⚠️ Error: {e}")
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
