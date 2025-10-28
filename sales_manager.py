@@ -9,7 +9,7 @@ class SalesManager:
     def record_sale(self, product_id, quantity):
         product = self.inventory.get_product(product_id)
         if not product:
-            print(f"❌ Product ID {product_id} not found.")
+            print(f"Product ID {product_id} not found.")
             return
         if quantity > product.stock:
             raise OutOfStockError(f"Cannot sell {quantity} units. Only {product.stock} left.")
