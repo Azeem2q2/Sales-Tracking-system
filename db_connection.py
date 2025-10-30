@@ -1,22 +1,22 @@
 from dotenv import load_dotenv
 import os
 import mysql.connector
+from mysql.connector import Error
 
-# Load environment variables from .env file
+# Load environment variables from creds.env
 load_dotenv(dotenv_path="creds.env")
 
-# Get values from .env
-host = os.getenv("DB_HOST")
-user = os.getenv("DB_USER")
-password = os.getenv("DB_PASS")
-database = os.getenv("DB_NAME")
-
-# Connect to MySQL
-conn = mysql.connector.connect(
-    host=host,
-    user=user,
-    password=password,
-    database=database
-)
-
-print("Connected to MySQL!")
+def get_connection():
+    try:
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASS"),
+            database=os.getenv("DB_NAME")
+        )
+        if conn.is_connected():
+            print("Connected to MySQL!")
+            return conn
+    except Error as e:
+        print(f"Connection error: {e}")
+        return None
