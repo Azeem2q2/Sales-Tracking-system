@@ -2,17 +2,18 @@ from db_connection import get_connection
 
 class InventoryManager:
     def __init__(self):
-        pass  # No need for in-memory dictionary anymore
+        pass  # No in-memory dictionary needed
 
-    #Add a new product
     def add_product(self, product_id, name, price, stock):
         conn = get_connection()
+        if not conn:
+            print("Failed to connect to database.")
+            return
         cursor = conn.cursor()
 
-        # Check if product already exists
         cursor.execute("SELECT id FROM products WHERE id = %s", (product_id,))
         if cursor.fetchone():
-            print(f"Product ID {product_id} already exists.")
+            print(f"Product ID '{product_id}' already exists.")
             conn.close()
             return
 
@@ -22,11 +23,13 @@ class InventoryManager:
         )
         conn.commit()
         conn.close()
-        print(f"Product '{name}' added successfully!")
+        print(f"Product '{name}' added successfully.")
 
-    #Update an existing product
     def update_product(self, product_id, name=None, price=None, stock=None):
         conn = get_connection()
+        if not conn:
+            print("Failed to connect to database.")
+            return
         cursor = conn.cursor()
 
         updates = []
@@ -55,13 +58,15 @@ class InventoryManager:
         conn.close()
 
         if cursor.rowcount > 0:
-            print(f"Product '{product_id}' updated successfully!")
+            print(f"Product '{product_id}' updated successfully.")
         else:
-            print(f"❌ Product ID {product_id} not found.")
+            print(f"Product ID '{product_id}' not found.")
 
-    #Remove a product
     def remove_product(self, product_id):
         conn = get_connection()
+        if not conn:
+            print("Failed to connect to database.")
+            return
         cursor = conn.cursor()
 
         cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
@@ -71,11 +76,13 @@ class InventoryManager:
         if cursor.rowcount > 0:
             print(f"Product '{product_id}' removed successfully.")
         else:
-            print(f"Product ID {product_id} not found.")
+            print(f"Product ID '{product_id}' not found.")
 
-    #List all products
     def list_products(self):
         conn = get_connection()
+        if not conn:
+            print("Failed to connect to database.")
+            return
         cursor = conn.cursor()
         cursor.execute("SELECT id, name, price, stock FROM products")
         products = cursor.fetchall()
@@ -87,12 +94,14 @@ class InventoryManager:
 
         print("\nCurrent Inventory:")
         for p in products:
-            print(f"ID: {p[0]}, Name: {p[1]}, Price: ₹{p[2]}, Stock: {p[3]}")
+            print(f"ID: {p[0]}, Name: {p[1]}, Price: ₹{p[2]:.2f}, Stock: {p[3]}")
 
-    #Get a single product (for sales use)
     def get_product(self, product_id):
         conn = get_connection()
-        cursor = conn.cursor()
+        if not conn:
+            print("Failed to connect to database.")
+            return None
+        cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT id, name, price, stock FROM products WHERE id = %s", (product_id,))
         product = cursor.fetchone()
         conn.close()
