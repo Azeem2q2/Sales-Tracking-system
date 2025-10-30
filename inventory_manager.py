@@ -1,42 +1,99 @@
-"""This class is your warehouse manager. It keeps track of all products, lets you add,
-update, remove, and view them. It uses a dictionary to store products by their ID. from product import Product"""
-
-
-from product import Product
+from db_connection import get_connection
 
 class InventoryManager:
     def __init__(self):
-        self.products = {}
+        pass  # No need for in-memory dictionary anymore
 
+    #Add a new product
     def add_product(self, product_id, name, price, stock):
-        if product_id in self.products:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Check if product already exists
+        cursor.execute("SELECT id FROM products WHERE id = %s", (product_id,))
+        if cursor.fetchone():
             print(f"Product ID {product_id} already exists.")
+            conn.close()
             return
-        self.products[product_id] = Product(product_id, name, price, stock)
+
+        cursor.execute(
+            "INSERT INTO products (id, name, price, stock) VALUES (%s, %s, %s, %s)",
+            (product_id, name, price, stock)
+        )
+        conn.commit()
+        conn.close()
         print(f"Product '{name}' added successfully!")
 
+    #Update an existing product
     def update_product(self, product_id, name=None, price=None, stock=None):
-        product = self.products.get(product_id)
-        if not product:
-            print(f"Product ID {product_id} not found.")
-            return
-        if name: product.name = name
-        if price: product.price = price
-        if stock is not None: product.stock = stock
-        print(f"Product '{product_id}' updated.")
+        conn = get_connection()
+        cursor = conn.cursor()
 
+        updates = []
+        values = []
+
+        if name:
+            updates.append("name = %s")
+            values.append(name)
+        if price:
+            updates.append("price = %s")
+            values.append(price)
+        if stock is not None:
+            updates.append("stock = %s")
+            values.append(stock)
+
+        if not updates:
+            print("No updates provided.")
+            conn.close()
+            return
+
+        query = f"UPDATE products SET {', '.join(updates)} WHERE id = %s"
+        values.append(product_id)
+
+        cursor.execute(query, tuple(values))
+        conn.commit()
+        conn.close()
+
+        if cursor.rowcount > 0:
+            print(f"Product '{product_id}' updated successfully!")
+        else:
+            print(f"❌ Product ID {product_id} not found.")
+
+    #Remove a product
     def remove_product(self, product_id):
-        if product_id in self.products:
-            del self.products[product_id]
-            print(f"Product {product_id} removed.")
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
+        conn.commit()
+        conn.close()
+
+        if cursor.rowcount > 0:
+            print(f"Product '{product_id}' removed successfully.")
         else:
             print(f"Product ID {product_id} not found.")
 
+    #List all products
     def list_products(self):
-        if not self.products:
-            print("Inventory is empty.")
-        for p in self.products.values():
-            print(f"ID: {p.product_id}, Name: {p.name}, Price: ₹{p.price}, Stock: {p.stock}")
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, price, stock FROM products")
+        products = cursor.fetchall()
+        conn.close()
 
+        if not products:
+            print("Inventory is empty.")
+            return
+
+        print("\nCurrent Inventory:")
+        for p in products:
+            print(f"ID: {p[0]}, Name: {p[1]}, Price: ₹{p[2]}, Stock: {p[3]}")
+
+    #Get a single product (for sales use)
     def get_product(self, product_id):
-        return self.products.get(product_id)
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, price, stock FROM products WHERE id = %s", (product_id,))
+        product = cursor.fetchone()
+        conn.close()
+        return product
